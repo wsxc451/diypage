@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <el-container>
-      <el-header>自定义落地页管理系统</el-header>
+      <el-header>DIY Page System By Czm</el-header>
       <el-container ref="mainBody">
         <el-aside width="200px">
           <CompsWrap @mouseUp="mouseUp" :wrapEle="wrapEle"></CompsWrap>

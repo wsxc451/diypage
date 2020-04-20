@@ -3,6 +3,9 @@
 做专题页面或者可视化diy页面时,牵涉到一些解决思路;
 demo
 ![vue-diypage](https://github.com/wsxc451/diypage/blob/master/docs/diypage-1.png?raw=true "vue-diypage")
+
+视频演示(上传一个视频,可以看下动态效果)
+https://v.qq.com/x/page/w0953z3jf8q.html
 #### 1.页面布局
 ##### a.可以分类三栏,左侧组件栏,右侧数据编辑栏,中级,页面效果展示栏
 #### 2.动画效果

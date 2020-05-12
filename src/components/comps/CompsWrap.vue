@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import { getRandomColor } from "@/utils..js";
+import { getRandomColor } from "@/utils.js";
 import dragMe3 from "@/components/DragMe3";
 import eventBus from "../eventBus";
 export default {

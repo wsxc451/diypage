@@ -23,7 +23,7 @@
 
 <script>
 import Vue from "vue";
-import { getRandomColor } from "@/utils..js";
+import { getRandomColor } from "@/utils.js";
 import anime from "animejs/lib/anime.es.js";
 import DragWrap3 from "./drag/DragWrap3";
 import CompBox from "./CompBox";

@@ -1,5 +1,7 @@
 <template>
-  <div class="index">div</div>
+  <div class="index">
+    <boxGridGroup :items="datas"></boxGridGroup>
+  </div>
 </template>
 
 <script>

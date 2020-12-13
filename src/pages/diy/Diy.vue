@@ -8,15 +8,6 @@
         :id="`wrap_${item.sort}`"
         :ref="`wrap_${item.sort}`"
       >
-        <!-- <div
-          v-if="index==0"
-          :class="{droping:(item.sort == dragIndex)}"
-          class="drag-bar"
-          @dragenter="(e)=>{onDragEnter(e,item)}"
-          @dragleave="(e)=>{onDragLeave(e,item)}"
-          @drop="(e)=>{onDrop(e,item)}"
-        ></div>-->
-        <!-- <div v-if="index==0" :class="{droping:dropIndex==0}" class="drag-bar">0</div> -->
         <div
           class="drag-item"
           :class="{draging:(item.sort == dragIndex),draggable:dragable}"
@@ -46,20 +37,24 @@
   </div>
 </template>
 <script>
+/**
+ * 优化:
+ * 1.sort,不需要连续,可以跳跃,只要从大到小即可,目前版本需要连续
+ * 2.动画交互优化
+ * 3.性能优化
+ */
 import anime from "animejs/lib/anime.es.js";
 export default {
   name: 'Diy',
   data() {
     return {
       lists: [],
-      dragIndex: null,
-      dragItem: {},
-      dropIndex: null,
-      dragable: false,
-      enterY: null,
-      offsetY: null,
-      currenY: null,
-      lastY: null
+      dragIndex: null, //拖拽的sort
+      dropIndex: null, // 放置到某个sort
+      dragable: false, // 是否可以拖拽状态
+      enterY: null, // 上下滑标记
+      offsetY: null, //鼠标在拖动元素的相对y坐标
+      currenY: null//当前拖拽顶部坐标
     }
   },
   mounted() {
@@ -70,8 +65,7 @@ export default {
       { id: 41, name: '44444', type: 'item', sort: 4 }
     ]
     setTimeout( () => {
-      this.calcPosToLists()
-      this.dragable = true
+      this.reSetList()
     }, 300 );
   },
   methods: {
@@ -80,6 +74,14 @@ export default {
         let _temp = this.getWrapHeight( item.sort )
         return { ...item, height: _temp.height, top: _temp.top, bottom: _temp.height + _temp.top, mid: 0.5 * _temp.height + _temp.top }
       } )
+    },
+    reSetList() {
+      this.calcPosToLists()
+      this.dragIndex = null
+      this.dropIndex = null
+      this.offsetY = null
+      this.currenY = null
+      this.dragable = true
     },
     changeUp( dragItem = { sort: 4 }, dropItem = { sort: 1 } ) {
       // 总高度为 dropItem.top + dropItem.height -dragItem.height
@@ -162,14 +164,15 @@ export default {
         }
       } );
       this.lists = this.lists.sort( ( a, b ) => a.sort - b.sort );
-      this.dragable = true
+      // 位置改变后需要重新计算位置
+      this.reSetList()
     },
     getWrapHeight( sort ) {
       if ( this.$refs[ "wrap_" + sort ] ) {
         let _rect = this.$refs[ "wrap_" + sort ][ 0 ].getBoundingClientRect()
         return _rect
       } else {
-        return { height: 0, top: 0 }
+        return { height: 0, top: 0, bottom: 0 }
       }
     },
     onDragStart( e, item ) {
@@ -179,10 +182,8 @@ export default {
       }
       e.dataTransfer.setData( 'Text', item.sort )
       this.dragIndex = item.sort
-      this.dragItem = item
       this.offsetY = e.offsetY
       this.enterY = e.clientY
-      this.lastY = e.clientY
       this.dragable = false
       // e.preventDefault()
     },
@@ -197,21 +198,22 @@ export default {
         return
       }
       if ( e.clientY - this.enterY >= 0 ) {
-        console.error( 'up to down' )
-        let findInfo = this.getItemByCurrentTop( e.clientY )
+        // 向下滑动
+        let findInfo = this.getItemByCurrentTopDown( e.clientY )
         // console.log( findInfo )
         if ( this.dragIndex != findInfo && this.dragIndex - 1 != findInfo ) {
+          // if ( this.dragIndex != findInfo ) {
           this.dropIndex = findInfo
         }
       } else {
-        console.error( 'downa to up', e )
+        //向上滑动
         let findInfo = this.getItemByCurrentTopUp( e.clientY )
         if ( this.dragIndex != findInfo && this.dragIndex - 1 != findInfo ) {
           this.dropIndex = findInfo
         }
       }
     },
-    getItemByCurrentTop( top, selfSort ) {
+    getItemByCurrentTopDown( top, selfSort ) {
       for ( let i = 0, len = this.lists.length; i < len; i++ ) {
         this.currenY = top - this.offsetY
         if ( top - this.offsetY <= this.lists[ i ].mid ) {
@@ -229,35 +231,14 @@ export default {
       }
       return 1
     },
-    onDragLeave( e, item ) {
-      console.log( e )
-      //e.target.style.height = '5px'
-      //this.dropIndex = null
-    },
     onDragEnd( e, item ) {
-      // if ( this.dropIndex == null ) {
-      //   this.dropIndex = this.lists.length + 1
-      // }
       if ( this.dragIndex > this.dropIndex ) {
         // 向上移动时,要丢到位置+1
         this.changeUp( { sort: this.dragIndex }, { sort: this.dropIndex + 1 } )
       } else {
         this.changeDown( { sort: this.dragIndex }, { sort: this.dropIndex } )
       }
-
-      this.dragIndex = null
-      this.dropIndex = null
-      this.offsetY = null
     },
-    onDrop( e, item ) {
-      console.log( 'onDrop', e )
-      event.preventDefault();
-      var data = event.dataTransfer.getData( "Text" );
-      console.log( data )
-    },
-    resetList() {
-
-    }
   }
 }
 </script>

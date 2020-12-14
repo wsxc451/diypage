@@ -17,16 +17,17 @@
         >
           {{ item.id }} -- {{ item.name }}-- {{ item.sort }}-- t:{{ item.top }}-- mid:{{ item.mid }}
         </div>
-        <div class="drag-bar" :class="{ droping: dropIndex == item.sort }">{{ item.sort }}</div>
+        <div class="drag-bar" @dragover="(e) => e.preventDefault()" :class="{ droping: dropIndex == item.sort }"></div>
       </div>
     </div>
     <div class="right">
-      curentY:{{ currenY }}
+      <DiyOper />
+      <!-- curentY:{{ currenY }}
       <br />
       dragIndex: {{ dragIndex }}
       <br />
       dropIndex: {{ dropIndex }}
-      <br />
+      <br /> -->
     </div>
   </div>
 </template>
@@ -37,8 +38,10 @@
  * 2.动画交互优化
  * 3.性能优化
  */
+import DiyOper from "./DiyOper.vue"
 import anime from "animejs/lib/anime.es.js"
 export default {
+  components: { DiyOper },
   name: "Diy",
   data() {
     return {
@@ -270,14 +273,21 @@ export default {
 }
 .wrap .drag-bar {
   width: 100%;
-  height: 15px;
-  line-height: 15px;
+  height: 10px;
+  line-height: 10px;
   background: #e3e3e3;
 }
 .wrap .drag-bar.droping {
-  background: red;
+  background: #e3e3e3;
+  height: 100px;
 }
 .wrap .draging {
   border: 1px dashed blue;
+}
+
+.wrap .right {
+  flex: 1;
+  background: #fff;
+  display: block;
 }
 </style>

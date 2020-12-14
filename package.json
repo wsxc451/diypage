@@ -13,9 +13,11 @@
   },
   "dependencies": {
     "animejs": "^3.1.0",
+    "axios": "^0.21.0",
     "bootstrap": "^3.3.7",
-    "element-ui": "^2.13.0",
+    "element-ui": "2.14.1",
     "font-awesome": "^4.7.0",
+    "js-cookie": "^2.2.1",
     "vue": "^2.5.17",
     "vue-draggable-resizable": "^2.1.0",
     "vue-router": "^3.1.6",

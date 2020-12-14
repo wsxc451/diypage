@@ -1,25 +1,20 @@
 <template>
   <div id="comps">
-    <div
-      class="comp-item"
-      v-for="com in comps"
-      :key="com.id"
-      :style="{ background: com.bgcolor,height:com.height+'px' }"
-    >{{com.name}}</div>
+    <div class="comp-item" v-for="com in comps" :key="com.id" :style="{ background: com.bgcolor, height: com.height + 'px' }">{{ com.name }}</div>
   </div>
 </template>
 
 <script>
-import { getRandomColor } from "@/utils.js";
-import dragMe3 from "@/components/DragMe3";
-import eventBus from "../eventBus";
+import { getRandomColor } from "@/utils.js"
+import dragMe3 from "@/components/DragMe3"
+import eventBus from "../eventBus"
 export default {
   name: "comps-wrap",
   components: {
-    dragMe3
+    dragMe3,
   },
   props: {
-    wrapEle: {}
+    wrapEle: {},
   },
   data() {
     return {
@@ -27,14 +22,14 @@ export default {
       comps: [
         { id: 1, name: "组件1", bgcolor: getRandomColor(), height: 100 },
         { id: 2, name: "组件2", bgcolor: getRandomColor(), height: 150 },
-        { id: 3, name: "组件3", bgcolor: getRandomColor(), height: 200 }
-      ]
-    };
+        { id: 3, name: "组件3", bgcolor: getRandomColor(), height: 200 },
+      ],
+    }
   },
   created() {
-    let infos = localStorage.getItem( "pageInfo" );
-    if ( infos ) {
-      this.datas = JSON.parse( infos );
+    let infos = localStorage.getItem("pageInfo")
+    if (infos) {
+      this.datas = JSON.parse(infos)
     } else {
       this.datas = [
         {
@@ -42,7 +37,7 @@ export default {
           id: 1001,
           height: 100,
           originTop: 0,
-          bgcolor: "#e3e3e3"
+          bgcolor: "#e3e3e3",
         },
         {
           name: "组件2",
@@ -50,96 +45,95 @@ export default {
           height: 200,
           originTop: 0,
           bgcolor: "#20a0ff",
-          component: "CompBox"
+          component: "CompBox",
         },
         {
           name: "组件3",
           id: 1003,
           height: 150,
           originTop: 0,
-          bgcolor: "yellow"
+          bgcolor: "yellow",
         },
         {
           name: "组件4",
           id: 1004,
           originTop: 0,
           height: 120,
-          bgcolor: "pink"
-        }
-      ];
+          bgcolor: "pink",
+        },
+      ]
     }
   },
   mounted() {
-    this.initDrag();
-
+    this.initDrag()
   },
   methods: {
-    cloneNode( $el, x, y ) {
-      let wrapBox = this.wrapEle;
-      let cloneItem = $el.cloneNode( true );
-      cloneItem.style.position = "absolute";
-      cloneItem.style.left = x + "px";
-      cloneItem.style.top = y + "px";
-      wrapBox.appendChild( cloneItem );
-      return cloneItem;
+    cloneNode($el, x, y) {
+      let wrapBox = this.wrapEle
+      let cloneItem = $el.cloneNode(true)
+      cloneItem.style.position = "absolute"
+      cloneItem.style.left = x + "px"
+      cloneItem.style.top = y + "px"
+      wrapBox.appendChild(cloneItem)
+      return cloneItem
     },
     addItem() {
-      this.$refs.dragMe.addItem();
+      this.$refs.dragMe.addItem()
     },
     savePage() {
-      let infos = this.$refs.dragMe.getPageInfos();
-      console.log( infos );
-      localStorage.setItem( "pageInfo", JSON.stringify( infos ) );
+      let infos = this.$refs.dragMe.getPageInfos()
+      console.log(infos)
+      localStorage.setItem("pageInfo", JSON.stringify(infos))
     },
     resetPage() {
-      localStorage.removeItem( "pageInfo" );
+      localStorage.removeItem("pageInfo")
     },
     initDrag() {
-      let that = this;
-      let comNodes = document.getElementsByClassName( "comp-item" );
-      Array.prototype.forEach.call( comNodes, ( item, itemIndex ) => {
-        console.log( item );
-        item.onselectstart = function () {
-          return false;
-        };
-        let el = item;
-        item.onmousedown = e => {
+      let that = this
+      let comNodes = document.getElementsByClassName("comp-item")
+      Array.prototype.forEach.call(comNodes, (item, itemIndex) => {
+        console.log(item)
+        item.onselectstart = function() {
+          return false
+        }
+        let el = item
+        item.onmousedown = (e) => {
           //let cloneItem = this.cloneWrap(el);
-          let pageX = e.target.offsetLeft;
-          let pageY = e.target.offsetTop;
-          let cloneItem = that.cloneNode( item, pageX, pageY );
-          var disx = e.clientX - el.offsetLeft;
-          var disy = e.clientY - el.offsetTop;
-          eventBus.$emit( 'comp-move-start', { disx, disy } )
-          document.onmousemove = function ( e ) {
-            let left = e.clientX - disx;
-            let top = e.clientY - disy;
-            if ( left < 0 ) {
-              left = 0;
+          let pageX = e.target.offsetLeft
+          let pageY = e.target.offsetTop
+          let cloneItem = that.cloneNode(item, pageX, pageY)
+          var disx = e.clientX - el.offsetLeft
+          var disy = e.clientY - el.offsetTop
+          eventBus.$emit("comp-move-start", { disx, disy })
+          document.onmousemove = function(e) {
+            let left = e.clientX - disx
+            let top = e.clientY - disy
+            if (left < 0) {
+              left = 0
             }
-            cloneItem.style.top = top + "px";
-            cloneItem.style.left = left + "px";
-            eventBus.$emit( 'comp-move-ing', { top, left, disx, disy } )
-          };
-          document.onmouseup = e => {
-            console.log( "onmouseup", e );
-            let left = e.clientX - disx;
-            let top = e.clientY - disy;
-            eventBus.$emit( 'comp-move-end', Object.assign( {}, that.comps[ itemIndex ], { disx, disy, top } ) )
-            this.wrapEle.removeChild( cloneItem );
-            document.onmousemove = document.onmouseup = null;
-            this.$emit( "mouseUp", {
+            cloneItem.style.top = top + "px"
+            cloneItem.style.left = left + "px"
+            eventBus.$emit("comp-move-ing", { top, left, disx, disy })
+          }
+          document.onmouseup = (e) => {
+            console.log("onmouseup", e)
+            let left = e.clientX - disx
+            let top = e.clientY - disy
+            eventBus.$emit("comp-move-end", Object.assign({}, that.comps[itemIndex], { disx, disy, top }))
+            this.wrapEle.removeChild(cloneItem)
+            document.onmousemove = document.onmouseup = null
+            this.$emit("mouseUp", {
               e,
               left,
               top: top,
-              item: this.item
-            } );
-          };
-        };
-      } );
-    }
-  }
-};
+              item: this.item,
+            })
+          }
+        }
+      })
+    },
+  },
+}
 </script>
 
 <style scoped>
@@ -171,7 +165,6 @@ export default {
   background-color: #e9eef3;
   color: #333;
   text-align: center;
-  line-height: 160px;
 }
 
 body > .el-container {

@@ -26,22 +26,22 @@
 </template>
 
 <script>
-import dragMe3 from "@/components/DragMe3";
-import CompsWrap from "@/components/comps/CompsWrap.vue";
-import InputRuner from "@/components/InputRuner.vue";
+import dragMe3 from "@/components/DragMe3"
+import CompsWrap from "@/components/comps/CompsWrap.vue"
+import InputRuner from "@/components/InputRuner.vue"
 export default {
   name: "index",
   components: {
     dragMe3,
     CompsWrap,
-    InputRuner
+    InputRuner,
   },
   data() {
     return {
       datas: [],
       hasRadius: false,
-      wrapEle: undefined
-    };
+      wrapEle: undefined,
+    }
   },
   mounted() {
     // this.wrapEle = this.$refs.mainBody.$el;
@@ -91,34 +91,34 @@ export default {
       this.$refs.inputRuner.runStart()
     },
     getOffsetInfo() {
-      this.$refs.dragMe.getOffsetInfo();
+      this.$refs.dragMe.getOffsetInfo()
     },
     addItem() {
-      this.$refs.dragMe.addItem();
+      this.$refs.dragMe.addItem()
     },
-    mouseUp( val ) {
-      console.log( val );
+    mouseUp(val) {
+      console.log(val)
     },
     savePage() {
-      let infos = this.$refs.dragMe.getPageInfos();
-      console.log( infos );
-      localStorage.setItem( "pageInfo", JSON.stringify( infos ) );
+      let infos = this.$refs.dragMe.getPageInfos()
+      console.log(infos)
+      localStorage.setItem("pageInfo", JSON.stringify(infos))
     },
     resetPage() {
-      localStorage.removeItem( "pageInfo" );
+      localStorage.removeItem("pageInfo")
     },
     initDrag() {
-      let comNodes = document.getElementsByClassName( "comp-item" );
-      console.log( comNodes );
-      Array.prototype.forEach.call( comNodes, item => {
-        console.log( item );
-        item.onselectstart = function () {
-          return false;
-        };
-      } );
-    }
-  }
-};
+      let comNodes = document.getElementsByClassName("comp-item")
+      console.log(comNodes)
+      Array.prototype.forEach.call(comNodes, (item) => {
+        console.log(item)
+        item.onselectstart = function() {
+          return false
+        }
+      })
+    },
+  },
+}
 </script>
 
 <style scoped>
@@ -149,20 +149,18 @@ export default {
 .el-main {
   background-color: #e9eef3;
   color: #333;
-  text-align: center;
-  line-height: 160px;
 }
 
 body > .el-container {
   margin-bottom: 40px;
 }
 
-.el-container:nth-child(5) .el-aside,
+/* .el-container:nth-child(5) .el-aside,
 .el-container:nth-child(6) .el-aside {
   line-height: 260px;
 }
 
 .el-container:nth-child(7) .el-aside {
   line-height: 320px;
-}
+} */
 </style>

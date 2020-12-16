@@ -1,7 +1,7 @@
 <template>
   <div class="wrap">
     <div class="left">
-      <div class="drag-wrap" v-for="(item, index) in pageWrapList" :key="index" :id="`wrap_${item.sort}`" :ref="`wrap_${item.sort}`">
+      <div v-for="item in pageWrapList" :id="`wrap_${item.unid}`" :key="item.unid" :ref="`wrap_${item.unid}`" class="drag-wrap">
         <div
           class="drag-item"
           :class="{ draging: item.sort == dragIndex, draggable: dragable }"
@@ -25,17 +25,17 @@
               <div>请点击上传图片</div>
             </template>
 
-            <!-- {{ item.id }} -- {{ item.name }}-- {{ item.sort }}-- t:{{ item.top }}-- mid:{{ item.mid }} -->
+            <!-- {{ item.unid }} -- {{ item.name }}-- {{ item.sort }}-- t:{{ item.top }}-- mid:{{ item.mid }} -->
           </template>
         </div>
         <!-- <div class="drag-bar" @dragover="e => e.preventDefault()" :class="{ droping: dropIndex == item.sort }"></div> -->
       </div>
       <div class="add_oper" @click="addOper">
-        <i class="el-icon-circle-plus-outline"></i>
+        <i class="el-icon-circle-plus-outline" />
       </div>
     </div>
     <div class="right">
-      <DiyOper @onChange="onChange" />
+      <DiyOper @onChange="onChange" @fresh="onFresh" />
       <!-- curentY:{{ currenY }}
       <br />
       dragIndex: {{ dragIndex }}
@@ -57,8 +57,8 @@ import axios from 'axios'
 import DiyOper from './diyOper'
 import anime from 'animejs/lib/anime.es.js'
 export default {
-  components: { DiyOper },
   name: 'Diy',
+  components: { DiyOper },
   data() {
     return {
       lists: [],
@@ -93,6 +93,15 @@ export default {
       setPageWrapList: 'diypage/setPageWrapList',
       setActiveTab: 'diypage/setActiveTab'
     }),
+    async onFresh() {
+      await this.getLists()
+      if (this.operItem && this.operItem.sort) {
+        let operItem = this.pageWrapList.find(item => item.sort == this.operItem.sort)
+        this.setOperItem(operItem)
+      } else {
+        this.setOperItem({})
+      }
+    },
     onChange(event) {
       if (!this.dragable) {
         return
@@ -114,7 +123,7 @@ export default {
       this.setOperItem(item)
       this.setActiveTab('wrap')
     },
-    getLists() {
+    async getLists() {
       axios.get('http://127.0.0.1:7002/page/get', { params: { id: this.pageid } }).then(({ data }) => {
         // this.pageWrapList = res.data.data
         this.setPageInfo(data.data.page)
@@ -125,9 +134,9 @@ export default {
       })
     },
     calcPosToLists() {
-      console.log(this.pageWrapList)
+      // 计算高度以及位置
       let tempList = this.pageWrapList.map(item => {
-        let _temp = this.getWrapHeight(item.sort)
+        let _temp = this.getWrapHeight(item.unid)
         return { ...item, height: _temp.height, top: _temp.top, bottom: _temp.height + _temp.top, mid: 0.5 * _temp.height + _temp.top }
       })
       this.setPageWrapList(tempList)
@@ -135,8 +144,8 @@ export default {
     reSetList() {
       this.calcPosToLists()
       // console.log(this.operItem)
-      if (this.operItem.sort) {
-        let newItemOper = this.pageWrapList.find(item => item.id === this.operItem.id)
+      if (this.operItem && this.operItem.unid) {
+        let newItemOper = this.pageWrapList.find(item => item.unid === this.operItem.unid)
         this.setOperItem(newItemOper)
       }
 
@@ -148,27 +157,29 @@ export default {
     },
     changeUp(dragItem = { sort: 4 }, dropItem = { sort: 1 }) {
       // 总高度为 dropItem.top + dropItem.height -dragItem.height
-      let dragItemRect = this.getWrapHeight(dragItem.sort)
-      let dropItemRect = this.getWrapHeight(dropItem.sort)
       let tempLists = JSON.parse(JSON.stringify(this.pageWrapList))
+      let findDragItem = tempLists.find(item => item.sort == dragItem.sort)
+      let findDropItem = tempLists.find(item => item.sort == dropItem.sort)
+      let dragItemRect = this.getWrapHeight(findDragItem.unid)
+      let dropItemRect = this.getWrapHeight(findDropItem.unid)
       let _upHeight = dragItemRect.top - dropItemRect.top
       let changeList = []
       for (let i = 0, len = tempLists.length; i < len; i++) {
         let _tempSort = tempLists[i].sort
         if (_tempSort >= dropItem.sort && _tempSort < dragItem.sort) {
           anime({
-            targets: ['#wrap_' + _tempSort],
+            targets: ['#wrap_' + tempLists[i].unid],
             translateY: dragItemRect.height,
             duration: 200,
             loop: false
           })
-          changeList.push({ sort: _tempSort + 1, id: tempLists[i].id })
+          changeList.push({ sort: _tempSort + 1, unid: tempLists[i].unid })
         }
       }
-      let findItem = tempLists.find(item => item.sort == dragItem.sort)
-      changeList.push({ sort: dropItem.sort, id: findItem.id })
+
+      changeList.push({ sort: dropItem.sort, unid: findDragItem.unid })
       anime({
-        targets: ['#wrap_' + dragItem.sort],
+        targets: ['#wrap_' + findDragItem.unid],
         translateY: -_upHeight,
         duration: 200,
         loop: false
@@ -180,33 +191,36 @@ export default {
     },
     changeDown(dragItem = { sort: 1 }, dropItem = { sort: 4 }) {
       // 总高度为 dropItem.top + dropItem.height -dragItem.height
-      let dragItemRect = this.getWrapHeight(dragItem.sort)
-      let dropItemRect = this.getWrapHeight(dropItem.sort)
       let tempLists = JSON.parse(JSON.stringify(this.pageWrapList))
+      let findDragItem = tempLists.find(item => item.sort == dragItem.sort)
+      let findDropItem = tempLists.find(item => item.sort == dropItem.sort)
+      let dragItemRect = this.getWrapHeight(findDragItem.unid)
+      let dropItemRect = this.getWrapHeight(findDropItem.unid)
+
       let _downHeight = dropItemRect.top + dropItemRect.height - dragItemRect.height - dragItemRect.top
       let changeList = []
       for (let i = 0, len = tempLists.length; i < len; i++) {
         let _tempSort = tempLists[i].sort
         if (_tempSort > dragItem.sort && _tempSort <= dropItem.sort) {
+          console.log(['#wrap_' + tempLists[i].unid])
           anime({
-            targets: ['#wrap_' + _tempSort],
-            translateY: -this.getWrapHeight(dragItem.sort).height,
+            targets: ['#wrap_' + tempLists[i].unid],
+            translateY: -this.getWrapHeight(findDragItem.unid).height,
             duration: 200,
             loop: false
           })
-          changeList.push({ sort: _tempSort - 1, id: tempLists[i].id })
+          changeList.push({ sort: _tempSort - 1, unid: tempLists[i].unid })
         }
       }
-      let findItem = tempLists.find(item => item.sort == dragItem.sort)
-      changeList.push({ sort: dropItem.sort, id: findItem.id })
+      changeList.push({ sort: dropItem.sort, unid: findDragItem.unid })
       anime({
-        targets: ['#wrap_' + dragItem.sort],
+        targets: ['#wrap_' + findDragItem.unid],
         translateY: _downHeight,
         duration: 200,
         loop: false
       })
       //
-      //this.pageWrapList = tempLists
+      // this.pageWrapList = tempLists
       setTimeout(() => {
         // this.pageWrapList = tempLists.sort( ( a, b ) => { return a.sort - b.sort } )
         this.changeData(changeList)
@@ -214,10 +228,10 @@ export default {
     },
     changeData(changeList) {
       for (let i = 0, len = this.pageWrapList.length; i < len; i++) {
-        this.$refs[`wrap_${this.pageWrapList[i].sort}`][0].style.transform = 'translateY(0px)'
+        this.$refs[`wrap_${this.pageWrapList[i].unid}`][0].style.transform = 'translateY(0px)'
       }
       this.pageWrapList.forEach((wrap, index) => {
-        let info = changeList.find(item => item.id == wrap.id)
+        let info = changeList.find(item => item.unid == wrap.unid)
         if (info) {
           this.$set(this.pageWrapList, index, Object.assign({}, this.pageWrapList[index], { sort: info.sort }))
         }
@@ -227,9 +241,9 @@ export default {
       // 位置改变后需要重新计算位置
       this.reSetList()
     },
-    getWrapHeight(sort) {
-      if (this.$refs['wrap_' + sort]) {
-        let _rect = this.$refs['wrap_' + sort][0].getBoundingClientRect()
+    getWrapHeight(unid) {
+      if (this.$refs['wrap_' + unid]) {
+        let _rect = this.$refs['wrap_' + unid][0].getBoundingClientRect()
         return _rect
       } else {
         return { height: 0, top: 0, bottom: 0 }
@@ -262,7 +276,7 @@ export default {
     onDrag(e, item) {
       // console.log('onDrag', e)
       // 松开的一瞬间为0
-      //e.preventDefault()
+      // e.preventDefault()
       if (e.clientY == 0) {
         return
       }
@@ -277,7 +291,7 @@ export default {
         }
       } else {
         console.log('up')
-        //向上滑动
+        // 向上滑动
         let findInfo = this.getItemByCurrentTopUp(e.clientY)
         if (this.dragIndex != findInfo && this.dragIndex - 1 != findInfo) {
           this.dropIndex = findInfo
@@ -318,8 +332,9 @@ export default {
       if (this.pageWrapList.length > 0) {
         sortMax = this.pageWrapList.sort((a, b) => b.sort - a.sort)[0]
       }
+
       const newInfo = {
-        id: null,
+        unid: this.uuid(16),
         info: '',
         pageid: this.pageid,
         sort: sortMax.sort + 1,
@@ -331,6 +346,20 @@ export default {
       this.setPageWrapList(tempList)
       this.setOperItem(newInfo)
       this.setActiveTab('wrap')
+    },
+    uuid(len = 16) {
+      const s = []
+      const hexDigits = '0123456789abcdef'
+
+      for (let i = 0; i < len; i++) {
+        s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1)
+      }
+
+      // s[14] = '4' // bits 12-15 of the time_hi_and_version field to 0010
+      // s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1) // bits 6-7 of the clock_seq_hi_and_reserved to 01
+      // s[8] = s[13] = s[18] = s[23] = '-'
+
+      return s.join('')
     }
   }
 }

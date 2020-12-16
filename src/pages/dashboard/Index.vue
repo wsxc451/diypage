@@ -5,22 +5,17 @@
 </template>
 
 <script>
-const boxStatus = [
-  { value: 0, text: "异常" },
-  { value: 1, text: "正常" },
-  { value: 2, text: "警告" },
-]
-import boxGridGroup from "@/components/boxGrid/boxGridGroup.vue"
-import Diy from "../diy/Diy"
+import boxGridGroup from '@/components/boxGrid/boxGridGroup.vue'
+import Diy from '../diy/Diy'
 export default {
-  name: "dashboard",
+  name: 'dashboard',
   components: {
     boxGridGroup,
-    Diy,
+    Diy
   },
   data() {
     return {
-      datas: [],
+      datas: []
     }
   },
   mounted() {
@@ -28,7 +23,7 @@ export default {
   },
   created() {},
   methods: {
-    changeDown() {},
+    changeDown() {}
     // changeBox( index ) {
     //   console.log( index )
     //   let { value } = this.datas[ index ]
@@ -47,17 +42,15 @@ export default {
     //     } )
     //   }
     // }
-  },
+  }
 }
 </script>
 
 <style scoped>
 .index {
-  position: absolute;
+  /* position: absolute;
   left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  padding: 15px;
+  top: 0; */
+  box-sizing: border-box;
 }
 </style>

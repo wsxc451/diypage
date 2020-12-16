@@ -54,7 +54,7 @@
  */
 import { mapState, mapMutations } from 'vuex'
 import axios from 'axios'
-import DiyOper from './DiyOper'
+import DiyOper from './diyOper'
 import anime from 'animejs/lib/anime.es.js'
 export default {
   components: { DiyOper },

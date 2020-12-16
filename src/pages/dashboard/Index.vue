@@ -6,7 +6,7 @@
 
 <script>
 import boxGridGroup from '@/components/boxGrid/boxGridGroup.vue'
-import Diy from '../diy/Diy'
+import Diy from '../diy/diy'
 export default {
   name: 'dashboard',
   components: {

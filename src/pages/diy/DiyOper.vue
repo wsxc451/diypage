@@ -202,6 +202,13 @@ export default {
 .clear {
   clear: both;
 }
+.opers {
+  width: 200px;
+  height: 50px;
+  position: fixed;
+  bottom: 15px;
+  right: 20px;
+}
 </style>
 <style>
 .avatar-uploader .el-upload {
